@@ -11,8 +11,9 @@ public class PuzzleGameManager : MonoBehaviour
     
     private Dictionary<PuzzlePiece, Sprite> _currentPuzzle = new Dictionary<PuzzlePiece, Sprite>();
     private int _currentMoves;
+    private int _maxMovesAllowed;
     private int _numMatches;
-
+    private int _requiredNumMatches;
     private PuzzlePiece _firstPiece = null;
     
     private event Action OnTwoPiecesChosen;
@@ -38,13 +39,13 @@ public class PuzzleGameManager : MonoBehaviour
             }
         }
 
-        if (Camera.main != null && Camera.main.TryGetComponent<CameraScaler>(out var scaler))
+        if (Camera.main != null && Camera.main.TryGetComponent<CameraScaleAdjustment>(out var scaler))
         {
             scaler.RepositionCamera((int)(_currentPuzzle.Count * .5f));
         }
     }
 
-    public bool CheckMatch(PuzzlePiece firstSelection, PuzzlePiece secondSelection)
+    private bool CheckMatch(PuzzlePiece firstSelection, PuzzlePiece secondSelection)
     {
         return firstSelection.Equals(secondSelection);
     }
@@ -52,20 +53,29 @@ public class PuzzleGameManager : MonoBehaviour
     private void OnPuzzlePieceSelected(PuzzlePiece puzzlePieceRef)
     {
         if (!_currentPuzzle.TryGetValue(puzzlePieceRef, out var content)) return;
+        if (puzzlePieceRef.IsRevealed) return;
         
-        
-        puzzlePieceRef.RevealSprite(content);
         if (_firstPiece != null)
         {
             if (CheckMatch(_firstPiece, puzzlePieceRef))
             {
                 
             }
+            else
+            {
+                _firstPiece.Hide();
+                puzzlePieceRef.Hide();
+            }
+            //only add moves for the second piece
+            _currentMoves++;
         }
         else
         {
             _firstPiece = puzzlePieceRef;
         }
+
+        
+        
     }
 
     private void EndGame()

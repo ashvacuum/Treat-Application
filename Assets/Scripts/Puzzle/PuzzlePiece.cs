@@ -13,10 +13,12 @@ namespace Puzzle
         P4 = 1 << 3,
         P5 = 1 << 4
     }
+    
+    [RequireComponent(typeof(BoxCollider2D))] // require this to be interactable
     public class PuzzlePiece : MonoBehaviour, IInteractable, IEquatable<PuzzlePiece>
     {
-        private BoxCollider2D _collider;
-        private SpriteRenderer _spriteRenderer;
+        private SpriteRenderer _backgroundSpriteRenderer;
+        private SpriteRenderer _hiddenSpriteRenderer;
         private PuzzleType _type;
         
         public event Action<PuzzlePiece> OnPuzzlePieceSelectedEvent;
@@ -25,39 +27,45 @@ namespace Puzzle
 
         private void Awake()
         {
-            _collider = GetComponent<BoxCollider2D>();
-            _spriteRenderer = GetComponent<SpriteRenderer>();
+            _backgroundSpriteRenderer = GetComponent<SpriteRenderer>();
+            _hiddenSpriteRenderer = transform.GetComponentInChildren<SpriteRenderer>();
         }
-
+        
+        
         
 
-        public void Init(PuzzleType type)
+        public void Init(PuzzleData data)
         {
             IsRevealed = false;
             Hide();
-            _type = type;
-        }
-        public void SetSpriteBackGround(Sprite backGround)
-        {
-            _spriteRenderer.sprite = backGround;
+            _type = data.type;
+            _hiddenSpriteRenderer.sprite = data.sprite;
         }
         
-        public void RevealSprite(Sprite foreground)
+        public void SetSpriteBackGround(Sprite backGround)
         {
-            _spriteRenderer.sprite = foreground;
+            _backgroundSpriteRenderer.sprite = backGround;
         }
-
 
         public void Interact()
         {
             if (IsRevealed) return;
             OnPuzzlePieceSelectedEvent?.Invoke(this);
             IsRevealed = true;
+            
+            //TODO make a small animation lerping the alpha values of the background sprite
         }
 
-        public void Hide()
+        public void Hide(bool shouldAnimate = false)
         {
-            //hide sprite and return background
+            if (shouldAnimate)
+            {
+                //create coding animation here
+            }
+            else
+            {
+                _backgroundSpriteRenderer.color = new Color(1, 1, 1, 0);
+            }
         }
         
         public bool Equals(PuzzlePiece other)

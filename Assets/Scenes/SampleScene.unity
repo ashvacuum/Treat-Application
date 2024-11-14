@@ -217,6 +217,7 @@ GameObject:
   - component: {fileID: 929175993}
   - component: {fileID: 929175992}
   - component: {fileID: 929175991}
+  - component: {fileID: 929175994}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -237,7 +238,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _puzzlePrefab: {fileID: 5046273664542343897, guid: 9f739d39216ea684aabcb279b0a107cf, type: 3}
-  background: {fileID: 21300000, guid: ea1ec246c3cd70449985c7c041c48b5e, type: 3}
+  _background: {fileID: 21300000, guid: ea1ec246c3cd70449985c7c041c48b5e, type: 3}
   _spritesMatch:
   - _type: 0
     _sprite: {fileID: 21300000, guid: ef72f0fd0a5e1b143872ddd7b70c01ef, type: 3}
@@ -277,3 +278,15 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &929175994
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 929175990}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 056b5d5b927af754cb5803a3864defde, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

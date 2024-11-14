@@ -11,6 +11,7 @@ namespace Puzzle
     {
         [SerializeField]private PuzzlePiece _puzzlePrefab;
         [SerializeField] private Sprite _background;
+        [SerializeField] private Sprite _actual;
         [SerializeField]private List<PuzzleData> _spritesMatch;
         private readonly List<PuzzlePiece> _puzzlePieces = new List<PuzzlePiece>();
         private Dictionary<PuzzlePiece, Sprite> _puzzleContents = new Dictionary<PuzzlePiece, Sprite>();
@@ -56,8 +57,10 @@ namespace Puzzle
             for (int i = 0; i < gridSize; i++)
             {
                 _puzzlePieces[i].gameObject.SetActive(true); //initialize information here
+                _puzzlePieces[i].Init();
                 _puzzlePieces[i].Hide();
                 _puzzlePieces[i].SetSpriteBackGround(_background);
+                
                 puzzleDictionary[_puzzlePieces[i]] = sprites[i];
             }
 
@@ -76,15 +79,15 @@ namespace Puzzle
     public interface IInteractable
     {
         void Interact();
-        void Hide();
+        void Hide(bool shouldAnimate = false);
         
     }
     
     [Serializable]
     public struct PuzzleData
     {
-        public PuzzleType _type;
-        public Sprite _sprite;
+        public PuzzleType type;
+        public Sprite sprite;
 
     }
     

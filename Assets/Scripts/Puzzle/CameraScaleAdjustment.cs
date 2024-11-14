@@ -3,7 +3,7 @@ using UnityEngine.Serialization;
 
 namespace Puzzle
 {
-    public class CameraScaler : MonoBehaviour
+    public class CameraScaleAdjustment : MonoBehaviour
     {
         [SerializeField] private float _cameraOffset = 3;
         [SerializeField] private float _padding = 2;
