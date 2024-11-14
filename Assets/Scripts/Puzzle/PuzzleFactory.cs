@@ -10,6 +10,7 @@ namespace Puzzle
     public class PuzzleFactory : MonoBehaviour
     {
         [SerializeField]private PuzzlePiece _puzzlePrefab;
+        [SerializeField] private Sprite _background;
         [SerializeField]private List<PuzzleData> _spritesMatch;
         private readonly List<PuzzlePiece> _puzzlePieces = new List<PuzzlePiece>();
         private Dictionary<PuzzlePiece, Sprite> _puzzleContents = new Dictionary<PuzzlePiece, Sprite>();
@@ -56,6 +57,7 @@ namespace Puzzle
             {
                 _puzzlePieces[i].gameObject.SetActive(true); //initialize information here
                 _puzzlePieces[i].Hide();
+                _puzzlePieces[i].SetSpriteBackGround(_background);
                 puzzleDictionary[_puzzlePieces[i]] = sprites[i];
             }
 
