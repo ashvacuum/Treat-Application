@@ -12,14 +12,10 @@ namespace Puzzle
         [SerializeField]private PuzzlePiece _puzzlePrefab;
         [SerializeField] private Sprite _background;
         [SerializeField] private Sprite _actual;
-        [SerializeField]private List<PuzzleData> _spritesMatch;
-        private readonly List<PuzzlePiece> _puzzlePieces = new List<PuzzlePiece>();
-        private Dictionary<PuzzlePiece, Sprite> _puzzleContents = new Dictionary<PuzzlePiece, Sprite>();
+        [FormerlySerializedAs("_spritesMatch")] [SerializeField]private List<PuzzleData> _pieceInfo;
+        private List<PuzzlePiece> _puzzlePieces = new List<PuzzlePiece>();
 
-        private void Awake()
-        {
-            
-        }
+        
         /// <summary>
         /// Only happens once;
         /// </summary>
@@ -31,10 +27,9 @@ namespace Puzzle
                 for (var j = 0; j < gridSize; j++)
                 {
                     var currentContent = Instantiate(_puzzlePrefab, this.transform);
-                    _puzzlePrefab.gameObject.SetActive(false);
-                    _puzzlePieces.Add(_puzzlePrefab);
+                    currentContent.gameObject.SetActive(false);
                     currentContent.transform.position = new Vector3(i, j);
-                    
+                    _puzzlePieces.Add(currentContent);
                 }
             }
         }
@@ -52,27 +47,28 @@ namespace Puzzle
 
             var puzzleDictionary = new Dictionary<PuzzlePiece, Sprite>();
 
-            var sprites = GetRandomSprites(gridSize);
+            var puzzleData = GeneratePuzzleData(gridSize);
             
-            for (int i = 0; i < gridSize; i++)
+            for (var i = 0; i < gridSize; i++)
             {
                 _puzzlePieces[i].gameObject.SetActive(true); //initialize information here
-                _puzzlePieces[i].Init();
+                _puzzlePieces[i].Init(puzzleData[i]);
                 _puzzlePieces[i].Hide();
                 _puzzlePieces[i].SetSpriteBackGround(_background);
                 
-                puzzleDictionary[_puzzlePieces[i]] = sprites[i];
+                puzzleDictionary[_puzzlePieces[i]] = puzzleData[i].sprite;
             }
 
             return puzzleDictionary;
         }
 
-        
-
-        private List<Sprite> GetRandomSprites(int gridSize)
+        private List<PuzzleData> GeneratePuzzleData(int gridSize)
         {
-            //TODO: change this to actually provide sprites from a list
-            return new List<Sprite>();
+            var cutOffList = _pieceInfo;
+            cutOffList.RemoveRange(gridSize, _pieceInfo.Count - gridSize);
+            cutOffList.AddRange(cutOffList);
+            cutOffList.Shuffle();
+            return cutOffList;
         }
     }
 
@@ -80,7 +76,6 @@ namespace Puzzle
     {
         void Interact();
         void Hide(bool shouldAnimate = false);
-        
     }
     
     [Serializable]
@@ -88,7 +83,6 @@ namespace Puzzle
     {
         public PuzzleType type;
         public Sprite sprite;
-
     }
     
     
