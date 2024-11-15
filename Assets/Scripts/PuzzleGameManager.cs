@@ -19,10 +19,7 @@ public class PuzzleGameManager : MonoBehaviour
     private int _requiredNumMatches;
     private int _currentScore;
     private PuzzlePiece _firstPiece = null;
-
-    private Action<GameStartEvent> gameStartHandler;
     
-    private event Action OnTwoPiecesChosen;
     private void Awake()
     {
         if (_puzzleFactory == null)
@@ -33,17 +30,16 @@ public class PuzzleGameManager : MonoBehaviour
         _puzzleFactory.GetComponent<PuzzleFactory>();
         _puzzleFactory.GeneratePuzzlePool();
 
-        gameStartHandler = OnStartGame;
     }
 
     private void OnEnable()
     {
-        EventBus.Subscribe(gameStartHandler);
+        EventBus.Subscribe<GameStartEvent>(OnStartGame);
     }   
 
     private void OnDisable()
     {
-        EventBus.Unsubscribe(gameStartHandler);
+        EventBus.Unsubscribe<GameStartEvent>(OnStartGame);
     }
 
     private void OnStartGame(GameStartEvent evt)
@@ -58,7 +54,7 @@ public class PuzzleGameManager : MonoBehaviour
     {
         if (_puzzleFactory != null)
         {
-            _currentPuzzle = _puzzleFactory.GeneratePuzzle(_levelData.LevelInfos[difficultyLevel].gridSize);
+            _currentPuzzle = _puzzleFactory.GeneratePuzzle(_levelData.LevelInfos[difficultyLevel].gridX,_levelData.LevelInfos[difficultyLevel].gridY);
             foreach (var puzzle in _currentPuzzle)
             {
                 puzzle.OnPuzzlePieceSelectedEvent += OnPuzzlePieceSelected;
@@ -86,8 +82,8 @@ public class PuzzleGameManager : MonoBehaviour
             {
                 _currentScore++;
                 EventBus.Publish(new ScoreChangedEvent(_currentScore,1));
-                _firstPiece.DisableCollider();
-                puzzlePieceRef.DisableCollider();
+                _firstPiece.ToggleCollider(false);
+                puzzlePieceRef.ToggleCollider(false);
                 _firstPiece = null;
             }
             else

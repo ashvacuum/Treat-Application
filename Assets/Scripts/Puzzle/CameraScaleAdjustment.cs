@@ -25,12 +25,12 @@ namespace Puzzle
 
         private void OnEnable()
         {
-            EventBus.Subscribe(gameStarthandler);
+            //EventBus.Subscribe(gameStarthandler);
         }
 
         private void OnDisable()
         {
-            EventBus.Unsubscribe(gameStarthandler);
+            //EventBus.Unsubscribe(gameStarthandler);
         }
 
         private void OnGameStart(GameStartEvent start)

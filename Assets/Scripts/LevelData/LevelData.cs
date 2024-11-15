@@ -13,7 +13,9 @@ namespace LevelData
     [Serializable]
     public struct LevelInformation
     {
-        public int gridSize;
+        public int gridX;
+        public int gridY;
+        public int requiredMatches;
         public float timer;
     }
 }

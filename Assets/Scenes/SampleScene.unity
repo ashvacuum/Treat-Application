@@ -1199,7 +1199,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _puzzleFactory: {fileID: 929175991}
-  _levelData: {fileID: 0}
+  _levelData: {fileID: 11400000, guid: bff7ccff53442ee4c94d27f6c7591db7, type: 2}
 --- !u!4 &929175993
 Transform:
   m_ObjectHideFlags: 0

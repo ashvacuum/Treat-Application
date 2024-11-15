@@ -1,6 +1,8 @@
 using UnityEngine;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
 
 // Event base class
 public abstract class GameEvent { }
@@ -59,72 +61,39 @@ public class ScoreChangedEvent : GameEvent
 // Event Bus
 public static class EventBus
 {
-    private static readonly Dictionary<Type, Dictionary<object, Action<GameEvent>>> subscribers 
-        = new Dictionary<Type, Dictionary<object, Action<GameEvent>>>();
+    private static Dictionary<Type, List<Action<GameEvent>>> eventActions =
+        new Dictionary<Type, List<Action<GameEvent>>>();
 
-    public static void Subscribe<T>(Action<T> subscriber) where T : GameEvent
+    public static void Subscribe<T>(Action<T> action) where T : GameEvent
     {
-        var eventType = typeof(T);
-        
-        if (!subscribers.ContainsKey(eventType))
+        Type eventType = typeof(T);
+        if (!eventActions.ContainsKey(eventType))
         {
-            subscribers[eventType] = new Dictionary<object, Action<GameEvent>>();
+            eventActions[eventType] = new List<Action<GameEvent>>();
         }
 
-        void Wrapper(GameEvent e) => subscriber((T)e);
-        subscribers[eventType][subscriber] = Wrapper;
+        eventActions[eventType].Add(e => action((T)e));
     }
 
-    public static void Unsubscribe<T>(Action<T> subscriber) where T : GameEvent
+    public static void Unsubscribe<T>(Action<T> action) where T : GameEvent
     {
-        var eventType = typeof(T);
-        
-        if (subscribers.ContainsKey(eventType))
+        Type eventType = typeof(T);
+        if (eventActions.ContainsKey(eventType))
         {
-            if (subscribers[eventType].ContainsKey(subscriber))
-            {
-                subscribers[eventType].Remove(subscriber);
-                
-                if (subscribers[eventType].Count == 0)
-                {
-                    subscribers.Remove(eventType);
-                }
-            }
+            eventActions[eventType].Remove(e => action((T)e));
         }
     }
 
     public static void Publish<T>(T gameEvent) where T : GameEvent
     {
-        var eventType = typeof(T);
-        
-        if (subscribers.ContainsKey(eventType))
+        Type eventType = typeof(T);
+        if (eventActions.ContainsKey(eventType))
         {
-            // Create a copy of the delegates to avoid modification during iteration
-            var delegates = new List<Action<GameEvent>>(subscribers[eventType].Values);
-            
-            foreach (var subscriber in delegates)
+            foreach (var action in eventActions[eventType])
             {
-                try
-                {
-                    subscriber.Invoke(gameEvent);
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError($"Error publishing event {eventType.Name}: {e.Message}");
-                }
+                action(gameEvent);
             }
         }
-    }
-
-    public static int GetSubscriberCount<T>() where T : GameEvent
-    {
-        var eventType = typeof(T);
-        return subscribers.ContainsKey(eventType) ? subscribers[eventType].Count : 0;
-    }
-
-    public static void Clear()
-    {
-        subscribers.Clear();
     }
 }
 

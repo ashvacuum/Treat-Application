@@ -13,11 +13,6 @@ namespace Puzzle
         [SerializeField] private Sprite _background;
         [FormerlySerializedAs("_spritesMatch")] [SerializeField]private List<PuzzleData> _pieceInfo;
         private List<PuzzlePiece> _puzzlePool = new List<PuzzlePiece>();
-
-        private readonly List<int> _puzzleGridSizeToLevel = new List<int>()
-        {
-            0,2, 2, 3, 3, 3, 4, 4, 5
-        };
         
         /// <summary>
         /// Only happens once;
@@ -37,15 +32,15 @@ namespace Puzzle
             }
         }
         
-        public List<PuzzlePiece> GeneratePuzzle(int puzzleSize)
+        public List<PuzzlePiece> GeneratePuzzle(int puzzleSizeX, int puzzleSizeY)
         {
-            var gridSize = _puzzleGridSizeToLevel[puzzleSize] * 2;
-            var puzzleData = GeneratePuzzleData(gridSize);
+            var totalPieces = puzzleSizeX * puzzleSizeY;
+            var puzzleData = GeneratePuzzleData(totalPieces);
             var puzzleList = new List<PuzzlePiece>();
             
-            for (var i = 0; i < gridSize; i++)
+            for (var i = 0; i < puzzleSizeX; i++)
             {
-                for (var j = 0; j < gridSize; j++)
+                for (var j = 0; j < puzzleSizeY; j++)
                 {
                     SetupNewPuzzlePiece(puzzleData[i+j], new Vector2(i,j), puzzleList);
                 }
@@ -57,19 +52,20 @@ namespace Puzzle
         private void SetupNewPuzzlePiece(PuzzleData puzzleData, Vector2 pos, List<PuzzlePiece> puzzleList)
         {
             var newPiece = GetFromPool();
-            newPiece.gameObject.SetActive(true); //initialize information here
+            newPiece.gameObject.SetActive(true);
             newPiece.Init(puzzleData);
             newPiece.Hide();
-            //newPiece.SetSpriteBackGround(_background);
             newPiece.transform.position = pos;
             puzzleList.Add(newPiece);
         }
 
         private List<PuzzleData> GeneratePuzzleData(int gridSize)
         {
+            var actualRequiredSize = gridSize / 2;
             var cutOffList = new List<PuzzleData>();
             cutOffList.AddRange(_pieceInfo);
-            cutOffList.RemoveRange(gridSize - 1, _pieceInfo.Count - gridSize);
+            cutOffList.Shuffle();
+            cutOffList.RemoveRange(actualRequiredSize - 1, _pieceInfo.Count - actualRequiredSize);
             cutOffList.AddRange(cutOffList);
             cutOffList.Shuffle();
             return cutOffList;
@@ -110,7 +106,7 @@ namespace Puzzle
         void Interact();
         void Hide(bool shouldAnimate = false, float delay = 1);
 
-        void DisableCollider();
+        void ToggleCollider(bool isEnabled);
     }
     
     [Serializable]

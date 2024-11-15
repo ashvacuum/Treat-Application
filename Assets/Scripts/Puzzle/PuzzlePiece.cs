@@ -69,7 +69,7 @@ namespace Puzzle
                 {
                     _backgroundSpriteRenderer.DOFade(1, .3f);
                     _hiddenSpriteRenderer.DOFade(0, .2f);
-                    _collider.enabled = true;
+                    ToggleCollider(true);
                 }));
                 Debug.Log("Hiding with fade");
             }
@@ -79,16 +79,15 @@ namespace Puzzle
             }
         }
 
+        public void ToggleCollider(bool isEnabled)
+        {
+            _collider.enabled = isEnabled;
+        }
+
         private IEnumerator DelayedAction(float delay, Action callback)
         {
             yield return new WaitForSeconds(delay);
             callback?.Invoke();
-        }
-
-
-        public void DisableCollider()
-        {
-            _collider.enabled = false;
         }
         
         public bool Equals(PuzzlePiece other)
