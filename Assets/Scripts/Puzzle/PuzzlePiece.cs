@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
+using UnityEditor;
 using UnityEngine;
 
 namespace Puzzle
@@ -11,7 +13,10 @@ namespace Puzzle
         P2 = 1 << 1,
         P3 = 1 << 2,
         P4 = 1 << 3,
-        P5 = 1 << 4
+        P5 = 1 << 4,
+        P6 = 1 << 5,
+        P7 = 1 << 6,
+        P8 = 1 << 7
     }
     
     [RequireComponent(typeof(BoxCollider2D))] // require this to be interactable
@@ -20,6 +25,7 @@ namespace Puzzle
         private SpriteRenderer _backgroundSpriteRenderer;
         private SpriteRenderer _hiddenSpriteRenderer;
         private PuzzleType _type;
+        private BoxCollider2D _collider;
         
         public event Action<PuzzlePiece> OnPuzzlePieceSelectedEvent;
         public bool IsRevealed { get; private set; }
@@ -28,18 +34,17 @@ namespace Puzzle
         private void Awake()
         {
             _backgroundSpriteRenderer = GetComponent<SpriteRenderer>();
-            _hiddenSpriteRenderer = transform.GetComponentInChildren<SpriteRenderer>();
+            _hiddenSpriteRenderer = transform.GetChild(0).GetComponent<SpriteRenderer>();
+            _collider = GetComponent<BoxCollider2D>();
         }
-        
-        
-        
 
         public void Init(PuzzleData data)
         {
             IsRevealed = false;
-            Hide();
             _type = data.type;
             _hiddenSpriteRenderer.sprite = data.sprite;
+            Hide();
+            _collider.enabled = true;
         }
         
         public void SetSpriteBackGround(Sprite backGround)
@@ -52,20 +57,38 @@ namespace Puzzle
             if (IsRevealed) return;
             OnPuzzlePieceSelectedEvent?.Invoke(this);
             IsRevealed = true;
-            
-            //TODO make a small animation lerping the alpha values of the background sprite
+            _backgroundSpriteRenderer.DOFade(0, .5f);
+            _hiddenSpriteRenderer.DOFade(1, .6f);
         }
 
-        public void Hide(bool shouldAnimate = false)
+        public void Hide(bool shouldAnimate = false, float delay = 1)
         {
             if (shouldAnimate)
             {
-                //create coding animation here
+                StartCoroutine(DelayedAction(delay,() =>
+                {
+                    _backgroundSpriteRenderer.DOFade(1, .3f);
+                    _hiddenSpriteRenderer.DOFade(0, .2f);
+                    _collider.enabled = true;
+                }));
+                Debug.Log("Hiding with fade");
             }
             else
             {
-                _backgroundSpriteRenderer.color = new Color(1, 1, 1, 0);
+                _hiddenSpriteRenderer.color = new Color(1, 1, 1, 0);
             }
+        }
+
+        private IEnumerator DelayedAction(float delay, Action callback)
+        {
+            yield return new WaitForSeconds(delay);
+            callback?.Invoke();
+        }
+
+
+        public void DisableCollider()
+        {
+            _collider.enabled = false;
         }
         
         public bool Equals(PuzzlePiece other)

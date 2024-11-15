@@ -11,17 +11,20 @@ namespace Puzzle
     {
         [SerializeField]private PuzzlePiece _puzzlePrefab;
         [SerializeField] private Sprite _background;
-        [SerializeField] private Sprite _actual;
         [FormerlySerializedAs("_spritesMatch")] [SerializeField]private List<PuzzleData> _pieceInfo;
-        private List<PuzzlePiece> _puzzlePieces = new List<PuzzlePiece>();
+        private List<PuzzlePiece> _puzzlePool = new List<PuzzlePiece>();
 
+        private readonly List<int> _puzzleGridSizeToLevel = new List<int>()
+        {
+            0,2, 2, 3, 3, 3, 4, 4, 5
+        };
         
         /// <summary>
         /// Only happens once;
         /// </summary>
-        public void InitializePuzzle()
+        public void GeneratePuzzlePool()
         {
-            const int gridSize = 4;
+            const int gridSize = 5;
             for (var i = 0; i < gridSize; i++)
             {
                 for (var j = 0; j < gridSize; j++)
@@ -29,53 +32,85 @@ namespace Puzzle
                     var currentContent = Instantiate(_puzzlePrefab, this.transform);
                     currentContent.gameObject.SetActive(false);
                     currentContent.transform.position = new Vector3(i, j);
-                    _puzzlePieces.Add(currentContent);
+                    _puzzlePool.Add(currentContent);
                 }
             }
         }
         
-        public Dictionary<PuzzlePiece, Sprite> GeneratePuzzle(int puzzleSize)
+        public List<PuzzlePiece> GeneratePuzzle(int puzzleSize)
         {
-            var gridSize = puzzleSize * 2;
-            
-            _puzzlePieces.Shuffle();
-            foreach (var piece in _puzzlePieces)
-            {
-                piece.gameObject.SetActive(false);
-            }
-            
-
-            var puzzleDictionary = new Dictionary<PuzzlePiece, Sprite>();
-
+            var gridSize = _puzzleGridSizeToLevel[puzzleSize] * 2;
             var puzzleData = GeneratePuzzleData(gridSize);
+            var puzzleList = new List<PuzzlePiece>();
             
             for (var i = 0; i < gridSize; i++)
             {
-                _puzzlePieces[i].gameObject.SetActive(true); //initialize information here
-                _puzzlePieces[i].Init(puzzleData[i]);
-                _puzzlePieces[i].Hide();
-                _puzzlePieces[i].SetSpriteBackGround(_background);
-                
-                puzzleDictionary[_puzzlePieces[i]] = puzzleData[i].sprite;
+                for (var j = 0; j < gridSize; j++)
+                {
+                    SetupNewPuzzlePiece(puzzleData[i+j], new Vector2(i,j), puzzleList);
+                }
             }
+            
+            return puzzleList;
+        }
 
-            return puzzleDictionary;
+        private void SetupNewPuzzlePiece(PuzzleData puzzleData, Vector2 pos, List<PuzzlePiece> puzzleList)
+        {
+            var newPiece = GetFromPool();
+            newPiece.gameObject.SetActive(true); //initialize information here
+            newPiece.Init(puzzleData);
+            newPiece.Hide();
+            //newPiece.SetSpriteBackGround(_background);
+            newPiece.transform.position = pos;
+            puzzleList.Add(newPiece);
         }
 
         private List<PuzzleData> GeneratePuzzleData(int gridSize)
         {
-            var cutOffList = _pieceInfo;
-            cutOffList.RemoveRange(gridSize, _pieceInfo.Count - gridSize);
+            var cutOffList = new List<PuzzleData>();
+            cutOffList.AddRange(_pieceInfo);
+            cutOffList.RemoveRange(gridSize - 1, _pieceInfo.Count - gridSize);
             cutOffList.AddRange(cutOffList);
             cutOffList.Shuffle();
             return cutOffList;
+        }
+
+        private PuzzlePiece GetFromPool()
+        {
+            var piece = _puzzlePool.FirstOrDefault(s => !s.gameObject.activeSelf);
+            if (piece == null)
+            {
+                piece = Instantiate(_puzzlePrefab, this.transform);
+            }
+            else
+            {
+                _puzzlePool.Remove(piece);
+            }
+
+            return piece;
+        }
+
+        private void ReturnToPool(PuzzlePiece piece)
+        {
+            piece.gameObject.SetActive(false);
+            _puzzlePool.Add(piece);
+        }
+
+        public void ReturnToPool(List<PuzzlePiece> pieces)
+        {
+            foreach (var piece in pieces)
+            {
+                ReturnToPool(piece);
+            }
         }
     }
 
     public interface IInteractable
     {
         void Interact();
-        void Hide(bool shouldAnimate = false);
+        void Hide(bool shouldAnimate = false, float delay = 1);
+
+        void DisableCollider();
     }
     
     [Serializable]

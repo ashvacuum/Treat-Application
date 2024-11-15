@@ -1,20 +1,26 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using LevelData;
 using Puzzle;
+using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 
 public class PuzzleGameManager : MonoBehaviour
 {
     [SerializeField]private PuzzleFactory _puzzleFactory;
+    [SerializeField] private LevelData.LevelData _levelData;
     
-    private Dictionary<PuzzlePiece, Sprite> _currentPuzzle = new Dictionary<PuzzlePiece, Sprite>();
+    private List<PuzzlePiece> _currentPuzzle = new List<PuzzlePiece>();
     private int _currentMoves;
     private int _maxMovesAllowed;
     private int _numMatches;
     private int _requiredNumMatches;
+    private int _currentScore;
     private PuzzlePiece _firstPiece = null;
+
+    private Action<GameStartEvent> gameStartHandler;
     
     private event Action OnTwoPiecesChosen;
     private void Awake()
@@ -25,23 +31,43 @@ public class PuzzleGameManager : MonoBehaviour
         }
 
         _puzzleFactory.GetComponent<PuzzleFactory>();
-        _puzzleFactory.InitializePuzzle();
+        _puzzleFactory.GeneratePuzzlePool();
+
+        gameStartHandler = OnStartGame;
     }
 
-    public void StartGame(int difficultyLevel)
+    private void OnEnable()
+    {
+        EventBus.Subscribe(gameStartHandler);
+    }   
+
+    private void OnDisable()
+    {
+        EventBus.Unsubscribe(gameStartHandler);
+    }
+
+    private void OnStartGame(GameStartEvent evt)
+    {
+        _firstPiece = null;
+        StartGame(evt.Difficulty);
+        _currentScore = 0;
+        
+    }
+
+    private void StartGame(int difficultyLevel)
     {
         if (_puzzleFactory != null)
         {
-            _currentPuzzle = _puzzleFactory.GeneratePuzzle(difficultyLevel);
+            _currentPuzzle = _puzzleFactory.GeneratePuzzle(_levelData.LevelInfos[difficultyLevel].gridSize);
             foreach (var puzzle in _currentPuzzle)
             {
-                puzzle.Key.OnPuzzlePieceSelectedEvent += OnPuzzlePieceSelected;
+                puzzle.OnPuzzlePieceSelectedEvent += OnPuzzlePieceSelected;
             }
         }
 
         if (Camera.main != null && Camera.main.TryGetComponent<CameraScaleAdjustment>(out var scaler))
         {
-            scaler.RepositionCamera((int)(_currentPuzzle.Count * .5f));
+            scaler.RepositionCamera( (int)Mathf.Sqrt(_currentPuzzle.Count));
         }
     }
 
@@ -52,19 +78,24 @@ public class PuzzleGameManager : MonoBehaviour
     
     private void OnPuzzlePieceSelected(PuzzlePiece puzzlePieceRef)
     {
-        if (!_currentPuzzle.TryGetValue(puzzlePieceRef, out var content)) return;
         if (puzzlePieceRef.IsRevealed) return;
         
         if (_firstPiece != null)
         {
             if (CheckMatch(_firstPiece, puzzlePieceRef))
             {
-                
+                _currentScore++;
+                EventBus.Publish(new ScoreChangedEvent(_currentScore,1));
+                _firstPiece.DisableCollider();
+                puzzlePieceRef.DisableCollider();
+                _firstPiece = null;
             }
             else
             {
-                _firstPiece.Hide();
-                puzzlePieceRef.Hide();
+                //add an event bus here for moves made
+                _firstPiece.Hide(true);
+                puzzlePieceRef.Hide(true);
+                _firstPiece = null;
             }
             //only add moves for the second piece
             _currentMoves++;
