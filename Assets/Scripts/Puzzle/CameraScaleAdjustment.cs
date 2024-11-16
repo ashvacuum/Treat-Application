@@ -43,14 +43,14 @@ namespace Puzzle
         /// Manages camera positioning when generating boards
         /// </summary>
         /// <param name="gridSize"></param>
-        public void RepositionCamera(int gridSize) {
-            var tempPos = new Vector3((gridSize-1) * .5f, (gridSize-1) * .5f, -_cameraOffset);
+        public void RepositionCamera(int gridSizeX, int gridSizeY) {
+            var tempPos = new Vector3((gridSizeX-1) * .5f, (gridSizeY-1) * .5f, -_cameraOffset);
             transform.position = tempPos;
             //Camera.main.orthographicSize = (board.width >= board.height) ? (board.width / 2 + padding) / aspectRatio : board.height / 2 + padding;
 
             if (cam != null)
             {
-                cam.orthographicSize = gridSize * .5f + (_padding % 7);
+                cam.orthographicSize = gridSizeY * .5f + (_padding % 7);
             }
 
         }

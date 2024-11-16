@@ -24,6 +24,7 @@ public class GameUIController : MonoBehaviour
     [SerializeField] private Button _startGameButton;
     [SerializeField] private Slider _startGameSlider;
     [SerializeField] private TextMeshProUGUI _levelText;
+    [SerializeField] private TMP_InputField _userNameInput;
 
     
     [Header("In-Game UI Elements")]
@@ -38,17 +39,25 @@ public class GameUIController : MonoBehaviour
     [SerializeField] private Button _mainMenuButton;
     [SerializeField] private TextMeshProUGUI _finalScoreText;
 
-    // Events
-    public event Action OnGameStart;
-    public event Action OnGamePause;
-    public event Action OnGameResume;
-    public event Action OnGameEnd;
-    public event Action<int> OnScoreChanged;
+    
     public GameStateEvent OnStateChanged = new GameStateEvent();
 
     // State machine
     private GameUIState currentState;
     private IGameUIState[] states;
+    private int _lastKnownDifficulty;
+
+    private void OnEnable()
+    {
+        EventBus.Subscribe<TimerUpdateEvent>(UpdateTimer);
+        EventBus.Subscribe<ScoreChangedEvent>(UpdateScoreUI);
+    }
+
+    private void OnDisable()
+    {
+        EventBus.Subscribe<TimerUpdateEvent>(UpdateTimer);
+        EventBus.Unsubscribe<ScoreChangedEvent>(UpdateScoreUI);
+    }
 
     private void Awake()
     {
@@ -87,8 +96,6 @@ public class GameUIController : MonoBehaviour
         if (_mainMenuButton != null)
             _mainMenuButton.onClick.AddListener(ReturnToMainMenu);
 
-        // Score changed event
-        OnScoreChanged += UpdateScoreUI;
     }
 
     private void Start()
@@ -112,10 +119,9 @@ public class GameUIController : MonoBehaviour
         if (_mainMenuButton != null)
             _mainMenuButton.onClick.RemoveListener(ReturnToMainMenu);
 
-        OnScoreChanged -= UpdateScoreUI;
     }
 
-    public void TransitionTo<T>() where T : IGameUIState
+    protected void TransitionTo<T>() where T : IGameUIState
     {
         currentState?.OnExit();
 
@@ -134,7 +140,8 @@ public class GameUIController : MonoBehaviour
     private void StartGame()
     {
         TransitionTo<GameState>();
-        EventBus.Publish(new GameStartEvent(Time.time, (int)_startGameSlider.value));
+        _lastKnownDifficulty = (int)_startGameSlider.value;
+        EventBus.Publish(new GameStartEvent(Time.time, _lastKnownDifficulty, _userNameInput.text));
     }
 
     private void UpdateLevelValue(float value)
@@ -149,12 +156,12 @@ public class GameUIController : MonoBehaviour
         if (Time.timeScale == 0)
         {
             Time.timeScale = 1;
-            OnGameResume?.Invoke();
+            EventBus.Publish(new GamePauseEvent(true));
         }
         else
         {
             Time.timeScale = 0;
-            OnGamePause?.Invoke();
+            EventBus.Publish(new GamePauseEvent(false));
         }
     }
 
@@ -167,7 +174,8 @@ public class GameUIController : MonoBehaviour
     private void RestartGame()
     {
         TransitionTo<GameState>();
-        OnGameStart?.Invoke();
+        var userName = _userNameInput != null ? _userNameInput.text : string.Empty;
+        EventBus.Publish(new GameStartEvent(Time.time, _lastKnownDifficulty, userName));
     }
 
     private void ReturnToMainMenu()
@@ -176,18 +184,18 @@ public class GameUIController : MonoBehaviour
     }
 
     // UI Update Methods
-    public void UpdateScoreUI(int newScore)
+    private void UpdateScoreUI(ScoreChangedEvent evt)
     {
         if (_scoreText != null)
-            _scoreText.text = $"Score: {newScore}";
+            _scoreText.text = $"Score: {evt.NewScore}";
         if (_finalScoreText != null && currentState is PostGameState)
-            _finalScoreText.text = $"Final Score: {newScore}";
+            _finalScoreText.text = $"Final Score: {evt.NewScore}";
     }
 
-    public void UpdateTimer(float time)
+    private void UpdateTimer(TimerUpdateEvent evt)
     {
         if (_timerText != null)
-            _timerText.text = $"Time: {time:F1}";
+            _timerText.text = $"Time: {evt.TimeLeft:F1}";
     }
 
     // Panel control methods
@@ -198,9 +206,7 @@ public class GameUIController : MonoBehaviour
     // Public methods for external systems
     public void EndGame(int finalScore)
     {
-        UpdateScoreUI(finalScore);
         TransitionTo<PostGameState>();
-        OnGameEnd?.Invoke();
         
         
     }

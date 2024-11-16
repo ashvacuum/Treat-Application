@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace LevelData
 {
@@ -15,7 +16,8 @@ namespace LevelData
     {
         public int gridX;
         public int gridY;
+        public int numberMoves;
         public int requiredMatches;
-        public float timer;
+        [FormerlySerializedAs("timer")] public float timeLeft;
     }
 }

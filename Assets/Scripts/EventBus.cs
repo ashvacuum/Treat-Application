@@ -12,10 +12,44 @@ public class GameStartEvent : GameEvent
 {
     public float StartTime { get; }
     public int Difficulty { get; }
-    public GameStartEvent(float startTime, int difficulty)
+    
+    public string Username { get; }
+    public GameStartEvent(float startTime, int difficulty, string username)
     {
         StartTime = startTime;
         Difficulty = difficulty;
+        Username = username;
+    }
+}
+
+public class TimerStartEvent : GameEvent
+{
+    public float TimeLeft { get; }
+
+    public TimerStartEvent(float timeLeft)
+    {
+        TimeLeft = timeLeft;
+    }
+}
+
+public class TimerUpdateEvent : GameEvent
+{
+    public float TimeLeft { get; }
+
+    public TimerUpdateEvent(float timeLeft)
+    {
+        TimeLeft = timeLeft;
+    }
+}
+
+
+public class GamePauseEvent : GameEvent
+{
+    public bool IsPaused { get; }
+
+    public GamePauseEvent(bool isPaused)
+    {
+        IsPaused = isPaused;
     }
 }
 
