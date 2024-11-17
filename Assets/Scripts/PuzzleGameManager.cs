@@ -111,12 +111,17 @@ public class PuzzleGameManager : MonoBehaviour
             _currentMoves++;
             
             EventBus.Publish(new MoveChangedEvent(_currentMoves));
-            
+
             if (CheckIfGameEnd(out var isWin))
             {
-                EventBus.Publish(new GameEndEvent(_currentScore, 5f, _currentLevelInfo.numberMoves - _currentMoves, isWin));
+                EventBus.Publish(new GameEndEvent(_currentScore, 5f, _currentLevelInfo.numberMoves - _currentMoves,
+                    isWin));
+
+                _puzzleFactory.ReturnToPool(_currentPuzzle);
+                _currentPuzzle.Clear();
+
             }
-            
+
             _firstPiece = null;
         }
         else
