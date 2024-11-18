@@ -65,7 +65,9 @@ namespace Puzzle
             var cutOffList = new List<PuzzleData>();
             cutOffList.AddRange(_pieceInfo);
             cutOffList.Shuffle();
-            cutOffList.RemoveRange(actualRequiredSize - 1, _pieceInfo.Count - actualRequiredSize);
+            Debug.Log($"Actual Required Size: {actualRequiredSize}, {gridSize}, {_pieceInfo.Count}");
+            
+            cutOffList.RemoveRange( actualRequiredSize - 1, _pieceInfo.Count - actualRequiredSize);
             cutOffList.AddRange(cutOffList);
             cutOffList.Shuffle();
             return cutOffList;

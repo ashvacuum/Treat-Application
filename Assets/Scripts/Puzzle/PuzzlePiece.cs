@@ -70,6 +70,7 @@ namespace Puzzle
                     _backgroundSpriteRenderer.DOFade(1, .3f);
                     _hiddenSpriteRenderer.DOFade(0, .2f);
                     ToggleCollider(true);
+                    IsRevealed = false;
                     Debug.Log("Reenabling Collider with fade");
                 }));
                 

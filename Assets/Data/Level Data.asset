@@ -15,37 +15,46 @@ MonoBehaviour:
   LevelInfos:
   - gridX: 0
     gridY: 0
+    numberMoves: 0
     requiredMatches: 0
-    timer: 0
+    timeLeft: 0
   - gridX: 2
     gridY: 2
+    numberMoves: 3
     requiredMatches: 1
-    timer: 30
+    timeLeft: 30
   - gridX: 3
     gridY: 2
+    numberMoves: 4
     requiredMatches: 2
-    timer: 20
+    timeLeft: 20
   - gridX: 4
     gridY: 2
+    numberMoves: 5
     requiredMatches: 3
-    timer: 45
+    timeLeft: 45
   - gridX: 4
     gridY: 2
+    numberMoves: 6
     requiredMatches: 4
-    timer: 60
+    timeLeft: 60
   - gridX: 4
     gridY: 4
+    numberMoves: 7
     requiredMatches: 5
-    timer: 75
+    timeLeft: 75
   - gridX: 4
     gridY: 4
+    numberMoves: 8
     requiredMatches: 6
-    timer: 60
+    timeLeft: 60
   - gridX: 4
     gridY: 4
+    numberMoves: 9
     requiredMatches: 7
-    timer: 50
+    timeLeft: 50
   - gridX: 5
     gridY: 5
+    numberMoves: 11
     requiredMatches: 4
-    timer: 35
+    timeLeft: 35

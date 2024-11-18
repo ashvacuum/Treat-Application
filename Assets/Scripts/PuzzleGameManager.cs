@@ -29,27 +29,35 @@ public class PuzzleGameManager : MonoBehaviour
 
         _puzzleFactory.GetComponent<PuzzleFactory>();
         _puzzleFactory.GeneratePuzzlePool();
-
     }
 
     private void OnEnable()
     {
         EventBus.Subscribe<GameStartEvent>(OnStartGame);
+        EventBus.Subscribe<GameQuitEvent>(OnQuitGame);
     }   
 
     private void OnDisable()
     {
         EventBus.Unsubscribe<GameStartEvent>(OnStartGame);
+        EventBus.Unsubscribe<GameQuitEvent>(OnQuitGame);
     }
 
     private void OnStartGame(GameStartEvent evt)
     {
         _firstPiece = null;
-        StartGame(evt.Difficulty);
         _currentScore = 0;
         _currentLevelInfo = _levelData.LevelInfos[evt.Difficulty];
+        Debug.Log($"Difficulty {evt.Difficulty}");
         _currentMoves = 0;
+        StartGame(evt.Difficulty);
         EventBus.Publish(new TimerStartEvent(_currentLevelInfo.timeLeft));
+    }
+
+    private void OnQuitGame(GameQuitEvent evt)
+    {
+        _firstPiece = null;
+        _puzzleFactory.ReturnToPool(_currentPuzzle);
     }
 
     private void StartGame(int difficultyLevel)

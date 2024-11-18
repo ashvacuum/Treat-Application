@@ -12,7 +12,6 @@ public class GameStartEvent : GameEvent
 {
     public float StartTime { get; }
     public int Difficulty { get; }
-    
     public string Username { get; }
     public GameStartEvent(float startTime, int difficulty, string username)
     {
@@ -20,6 +19,11 @@ public class GameStartEvent : GameEvent
         Difficulty = difficulty;
         Username = username;
     }
+}
+
+public class GameQuitEvent : GameEvent
+{
+    
 }
 
 public class TimerStartEvent : GameEvent

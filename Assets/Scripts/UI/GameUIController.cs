@@ -31,6 +31,7 @@ public class GameUIController : MonoBehaviour
     [SerializeField] private Button _pauseButton;
     [SerializeField] private Button _quitToMenuButton;
     [SerializeField] private TextMeshProUGUI _scoreText;
+    [SerializeField] private TextMeshProUGUI _moveText;
     [SerializeField] private TextMeshProUGUI _timerText;
 
     
@@ -38,25 +39,28 @@ public class GameUIController : MonoBehaviour
     [SerializeField] private Button _restartButton;
     [SerializeField] private Button _mainMenuButton;
     [SerializeField] private TextMeshProUGUI _finalScoreText;
+    [SerializeField] private StarScore[] _starScores;
 
     
     public GameStateEvent OnStateChanged = new GameStateEvent();
 
     // State machine
-    private GameUIState currentState;
-    private IGameUIState[] states;
+    private GameUIState _currentState;
+    private IGameUIState[] _states;
     private int _lastKnownDifficulty;
 
     private void OnEnable()
     {
         EventBus.Subscribe<TimerUpdateEvent>(UpdateTimer);
         EventBus.Subscribe<ScoreChangedEvent>(UpdateScoreUI);
+        EventBus.Subscribe<GameEndEvent>(PopulatePostGameWithData);
     }
 
     private void OnDisable()
     {
         EventBus.Subscribe<TimerUpdateEvent>(UpdateTimer);
         EventBus.Unsubscribe<ScoreChangedEvent>(UpdateScoreUI);
+        EventBus.Unsubscribe<GameEndEvent>(PopulatePostGameWithData);
     }
 
     private void Awake()
@@ -67,7 +71,7 @@ public class GameUIController : MonoBehaviour
 
     private void InitializeStates()
     {
-        states = new IGameUIState[]
+        _states = new IGameUIState[]
         {
             new PreGameState(this),
             new GameState(this),
@@ -88,7 +92,7 @@ public class GameUIController : MonoBehaviour
         if (_pauseButton != null)
             _pauseButton.onClick.AddListener(TogglePause);
         if (_quitToMenuButton != null)
-            _quitToMenuButton.onClick.AddListener(QuitToMenu);
+            _quitToMenuButton.onClick.AddListener(ReturnToMainMenu);
 
         // Post-game buttons
         if (_restartButton != null)
@@ -113,7 +117,7 @@ public class GameUIController : MonoBehaviour
         if (_pauseButton != null)
             _pauseButton.onClick.RemoveListener(TogglePause);
         if (_quitToMenuButton != null)
-            _quitToMenuButton.onClick.RemoveListener(QuitToMenu);
+            _quitToMenuButton.onClick.RemoveListener(ReturnToMainMenu);
         if (_restartButton != null)
             _restartButton.onClick.RemoveListener(RestartGame);
         if (_mainMenuButton != null)
@@ -123,15 +127,15 @@ public class GameUIController : MonoBehaviour
 
     protected void TransitionTo<T>() where T : IGameUIState
     {
-        currentState?.OnExit();
+        _currentState?.OnExit();
 
-        foreach (var state in states)
+        foreach (var state in _states)
         {
             if (state is not T) continue;
             
-            currentState = (GameUIState)state;
-            currentState.OnEnter();
-            OnStateChanged?.Invoke(currentState);
+            _currentState = (GameUIState)state;
+            _currentState.OnEnter();
+            OnStateChanged?.Invoke(_currentState);
             break;
         }
     }
@@ -141,6 +145,7 @@ public class GameUIController : MonoBehaviour
     {
         TransitionTo<GameState>();
         _lastKnownDifficulty = (int)_startGameSlider.value;
+        Debug.Log($"Last known {_lastKnownDifficulty}");
         EventBus.Publish(new GameStartEvent(Time.time, _lastKnownDifficulty, _userNameInput.text));
     }
 
@@ -148,8 +153,6 @@ public class GameUIController : MonoBehaviour
     {
         _levelText.text = $"{(int)value}";
     }
-
-    
 
     private void TogglePause()
     {
@@ -169,6 +172,7 @@ public class GameUIController : MonoBehaviour
     {
         Time.timeScale = 1;
         TransitionTo<PreGameState>();
+        EventBus.Publish(new GameQuitEvent());
     }
 
     private void RestartGame()
@@ -181,6 +185,7 @@ public class GameUIController : MonoBehaviour
     private void ReturnToMainMenu()
     {
         TransitionTo<PreGameState>();
+        EventBus.Publish(new GameQuitEvent());
     }
 
     // UI Update Methods
@@ -188,7 +193,7 @@ public class GameUIController : MonoBehaviour
     {
         if (_scoreText != null)
             _scoreText.text = $"Score: {evt.NewScore}";
-        if (_finalScoreText != null && currentState is PostGameState)
+        if (_finalScoreText != null && _currentState is PostGameState)
             _finalScoreText.text = $"Final Score: {evt.NewScore}";
     }
 
@@ -197,19 +202,40 @@ public class GameUIController : MonoBehaviour
         if (_timerText != null)
             _timerText.text = $"Time: {evt.TimeLeft:F1}";
     }
+    
+    private void PopulatePostGameWithData(GameEndEvent evt)
+    {
+        TransitionTo<PostGameState>();
+        
+        if (evt.DidWin)
+        {
+            foreach (var star in _starScores)
+            {
+                star.ShowStarSprite(true);
+            }
+
+            if (_finalScoreText != null)
+                _finalScoreText.text = $"Score: {evt.FinalScore}";
+        }
+        else
+        {
+            if (_finalScoreText != null)
+                _finalScoreText.text = $"Score: 0";
+        }     
+    }
+
+    private void OnMovesChanged(MoveChangedEvent evt)
+    {
+        if (_moveText != null)
+            _moveText.text = $"Moves Left: {evt.MoveCount}";
+    }
 
     // Panel control methods
     public void ShowPreGamePanel(bool show) => _preGamePanel.SetActive(show);
     public void ShowGamePanel(bool show) => _gamePanel.SetActive(show);
     public void ShowPostGamePanel(bool show) => _postGamePanel.SetActive(show);
 
-    // Public methods for external systems
-    public void EndGame(int finalScore)
-    {
-        TransitionTo<PostGameState>();
-        
-        
-    }
+    
 }
 
     public interface IGameUIState
