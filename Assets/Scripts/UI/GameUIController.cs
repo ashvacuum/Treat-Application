@@ -26,6 +26,7 @@ public class GameUIController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _levelText;
     [SerializeField] private TMP_InputField _userNameInput;
     [SerializeField] private LeaderboardPanel _leaderboardPanel;
+    [SerializeField] private Button _leaderboardBtn;
     
     [Header("In-Game UI Elements")]
     [SerializeField] private Button _pauseButton;
@@ -87,6 +88,8 @@ public class GameUIController : MonoBehaviour
             _startGameButton.onClick.AddListener(StartGame);
         if(_levelText != null && _startGameSlider != null)
             _startGameSlider.onValueChanged.AddListener(UpdateLevelValue);
+        if(_leaderboardBtn != null)
+            _leaderboardBtn.onClick.AddListener(OnLeaderboardButtonPressed);
         
 
         // In-game buttons
@@ -153,6 +156,11 @@ public class GameUIController : MonoBehaviour
     private void UpdateLevelValue(float value)
     {
         _levelText.text = $"{(int)value}";
+    }
+
+    private void OnLeaderboardButtonPressed()
+    {
+        _leaderboardPanel.gameObject.SetActive(true);
     }
 
     private void TogglePause()
