@@ -32,7 +32,7 @@ public class GameUIController : MonoBehaviour
     [SerializeField] private Button _pauseButton;
     [SerializeField] private Button _quitToMenuButton;
     [SerializeField] private TextMeshProUGUI _scoreText;
-    
+    [SerializeField] private TextMeshProUGUI _movesLeftText;
     [SerializeField] private TextMeshProUGUI _timerText;
 
     
@@ -225,6 +225,9 @@ public class GameUIController : MonoBehaviour
 
             if (_finalScoreText != null)
                 _finalScoreText.text = $"Score: {evt.FinalScore}";
+
+            if (_moveText.text != null)
+                _moveText.text = $"Moves Left : {evt.MovesLeft}";
         }
         else
         {
@@ -235,8 +238,8 @@ public class GameUIController : MonoBehaviour
 
     private void OnMovesChanged(MoveChangedEvent evt)
     {
-        if (_moveText != null)
-            _moveText.text = $"Moves Left: {evt.MoveCount}";
+        if (_movesLeftText != null)
+            _movesLeftText.text = $"Moves Left: {evt.MoveCount}";
     }
 
     // Panel control methods

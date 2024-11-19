@@ -8,6 +8,7 @@ namespace UI
     {
         [SerializeField] private TextMeshProUGUI _nameText;
         [SerializeField] private TextMeshProUGUI _scoreText;
+        [SerializeField] private TextMeshProUGUI _difficultyText;
         
         
         public void Init(GameSessionData data)

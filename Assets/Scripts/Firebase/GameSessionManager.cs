@@ -33,7 +33,8 @@ namespace Firebase
             _currentGameSession = new GameSessionData()
             {
                 playerId = evt.Username,
-                score = 0
+                score = 0,
+                difficulty = evt.Difficulty
             };
         }
 
@@ -44,7 +45,7 @@ namespace Firebase
             if (firestoreService != null)
             {
                 firestoreService.SavePlayerScore(_currentGameSession.playerId, _currentGameSession.playerId,
-                    _currentGameSession.score);
+                    _currentGameSession.score, _currentGameSession.difficulty);
             }
         }
 
@@ -59,5 +60,6 @@ namespace Firebase
     {
         public string playerId;
         public int score;
+        public int difficulty;
     }
 }

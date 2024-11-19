@@ -33,7 +33,7 @@ namespace Firebase
             }
         }
 
-        public async Task SavePlayerScore(string playerId, string playerName, int score)
+        public async Task SavePlayerScore(string playerId, string playerName, int score, int difficulty)
         {
             try
             {
@@ -42,7 +42,8 @@ namespace Firebase
                 {
                     { "name", playerName },
                     { "score", score },
-                    { "lastUpdated", Timestamp.GetCurrentTimestamp() }
+                    { "lastUpdated", Timestamp.GetCurrentTimestamp() },
+                    { "difficulty", difficulty }
                 };
 
                 await docRef.SetAsync(playerData);
@@ -100,7 +101,7 @@ namespace Firebase
             try
             {
                 Query highScoresQuery = _db.Collection(DB_NAME)
-                    .WhereGreaterThan("score", minimumScore)
+                    .WhereGreaterThanOrEqualTo("score", minimumScore)
                     .OrderByDescending("score")
                     .Limit(10);
 
@@ -108,13 +109,20 @@ namespace Firebase
                 
                 foreach (DocumentSnapshot document in querySnapshot.Documents)
                 {
-                    Dictionary<string, object> playerData = document.ToDictionary();
-                    Debug.Log($"Player: {playerData["name"]}, Score: {playerData["score"]}");
+                    var playerData = document.ToDictionary();
+
+
+                    if (!playerData.TryGetValue("name", out var nameObj) || !playerData.TryGetValue("score", out var scoreObj) || !playerData.TryGetValue("difficulty", out var difficultyObj)) continue;
                     
+                    var playerName = nameObj?.ToString() ?? string.Empty;
+                    var playerScore = Convert.ToInt32(scoreObj);
+                    var playerDifficulty = Convert.ToInt32(difficultyObj);
+    
                     GameSessionDataList.Add(new GameSessionData()
                     {
-                        playerId = (string)playerData["name"],
-                        score = int.Parse((string)playerData["score"])
+                        playerId = playerName,
+                        score = playerScore,
+                        difficulty = playerDifficulty
                     });
                 }
 
@@ -131,7 +139,7 @@ namespace Firebase
     public interface IFirestoreService
     {
         Task<bool> Initialize();
-        Task SavePlayerScore(string playerId, string playerName, int score);
+        Task SavePlayerScore(string playerId, string playerName, int score, int difficulty);
         Task<Dictionary<string, object>> GetPlayerData(string playerId);
         Task UpdatePlayerScore(string playerId, int newScore);
         Task<List<GameSessionData>> QueryHighScores(int minimumScore);

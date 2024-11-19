@@ -17,6 +17,7 @@ public class PuzzleGameManager : MonoBehaviour
     private int _currentMoves;
     private int _numMatches;
     private int _currentScore;
+    private float _timeLeft;
     private PuzzlePiece _firstPiece = null;
     private LevelInformation _currentLevelInfo;
     
@@ -43,6 +44,18 @@ public class PuzzleGameManager : MonoBehaviour
         EventBus.Unsubscribe<GameQuitEvent>(OnQuitGame);
     }
 
+    private void OnTimerHitZero(TimerUpdateEvent evt)
+    {
+        if (evt.TimeLeft <= 0)
+        {
+            EventBus.Publish(new GameEndEvent(_currentScore, 5f, _currentLevelInfo.numberMoves - _currentMoves,
+                false));
+
+            _puzzleFactory.ReturnToPool(_currentPuzzle);
+            _currentPuzzle.Clear();
+        }
+    }
+
     private void OnStartGame(GameStartEvent evt)
     {
         _firstPiece = null;
@@ -52,6 +65,7 @@ public class PuzzleGameManager : MonoBehaviour
         _currentMoves = 0;
         StartGame(evt.Difficulty);
         EventBus.Publish(new TimerStartEvent(_currentLevelInfo.timeLeft));
+        EventBus.Publish(new MoveChangedEvent( _currentLevelInfo.numberMoves));
     }
 
     private void OnQuitGame(GameQuitEvent evt)
@@ -101,7 +115,7 @@ public class PuzzleGameManager : MonoBehaviour
         {
             if (CheckMatch(_firstPiece, puzzlePieceRef))
             {
-                _currentScore++;
+                _currentScore += Mathf.CeilToInt((_currentLevelInfo.numberMoves - _currentMoves) * _timeLeft);
                 EventBus.Publish(new ScoreChangedEvent(_currentScore,1));
                 _firstPiece.ToggleCollider(false);
                 puzzlePieceRef.ToggleCollider(false);
@@ -118,16 +132,15 @@ public class PuzzleGameManager : MonoBehaviour
             //only add moves for the second piece
             _currentMoves++;
             
-            EventBus.Publish(new MoveChangedEvent(_currentMoves));
+            EventBus.Publish(new MoveChangedEvent(_currentLevelInfo.numberMoves - _currentMoves));
 
             if (CheckIfGameEnd(out var isWin))
             {
                 EventBus.Publish(new GameEndEvent(_currentScore, 5f, _currentLevelInfo.numberMoves - _currentMoves,
                     isWin));
-
-                _puzzleFactory.ReturnToPool(_currentPuzzle);
-                _currentPuzzle.Clear();
-
+                
+                EndGame();
+                
             }
 
             _firstPiece = null;
@@ -162,9 +175,11 @@ public class PuzzleGameManager : MonoBehaviour
 
     private void EndGame()
     {
+        _puzzleFactory.ReturnToPool(_currentPuzzle);
+        _currentPuzzle.Clear();
+                
         foreach (var puzzle in _currentPuzzle)
         {
-            puzzle.ToggleCollider(false);
             puzzle.OnPuzzlePieceSelectedEvent -= OnPuzzlePieceSelected;
         }
     }

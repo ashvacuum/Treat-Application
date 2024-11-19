@@ -22,39 +22,39 @@ MonoBehaviour:
     gridY: 2
     numberMoves: 3
     requiredMatches: 1
-    timeLeft: 30
+    timeLeft: 5
   - gridX: 3
     gridY: 2
     numberMoves: 4
     requiredMatches: 2
-    timeLeft: 20
+    timeLeft: 12
   - gridX: 4
     gridY: 2
     numberMoves: 5
     requiredMatches: 3
-    timeLeft: 45
+    timeLeft: 20
   - gridX: 4
     gridY: 2
     numberMoves: 6
     requiredMatches: 4
-    timeLeft: 60
+    timeLeft: 30
   - gridX: 4
     gridY: 4
     numberMoves: 7
     requiredMatches: 5
-    timeLeft: 75
+    timeLeft: 35
   - gridX: 4
     gridY: 4
     numberMoves: 8
     requiredMatches: 6
-    timeLeft: 60
+    timeLeft: 40
   - gridX: 4
     gridY: 4
     numberMoves: 9
     requiredMatches: 7
-    timeLeft: 50
+    timeLeft: 40
   - gridX: 5
-    gridY: 5
+    gridY: 4
     numberMoves: 11
     requiredMatches: 4
-    timeLeft: 35
+    timeLeft: 40

@@ -23,6 +23,8 @@ namespace UI
         private void OnTimerStart(TimerStartEvent evt)
         {
             _targetTime = evt.TimeLeft;
+            _timeElapsed = 0;
+            _isTimerRunning = true;
         }
     
         private void OnGameEnded(GameEndEvent evt)
