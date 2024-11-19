@@ -56,6 +56,7 @@ public class GameUIController : MonoBehaviour
         EventBus.Subscribe<TimerUpdateEvent>(UpdateTimer);
         EventBus.Subscribe<ScoreChangedEvent>(UpdateScoreUI);
         EventBus.Subscribe<GameEndEvent>(PopulatePostGameWithData);
+        EventBus.Subscribe<MoveChangedEvent>(OnMovesChanged);
     }
 
     private void OnDisable()
@@ -63,6 +64,7 @@ public class GameUIController : MonoBehaviour
         EventBus.Subscribe<TimerUpdateEvent>(UpdateTimer);
         EventBus.Unsubscribe<ScoreChangedEvent>(UpdateScoreUI);
         EventBus.Unsubscribe<GameEndEvent>(PopulatePostGameWithData);
+        EventBus.Unsubscribe<MoveChangedEvent>(OnMovesChanged);
     }
 
     private void Awake()

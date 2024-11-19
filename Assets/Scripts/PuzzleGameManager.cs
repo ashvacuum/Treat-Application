@@ -15,7 +15,7 @@ public class PuzzleGameManager : MonoBehaviour
     
     private List<PuzzlePiece> _currentPuzzle = new List<PuzzlePiece>();
     private int _currentMoves;
-    private int _numMatches;
+    private int _currentMatches;
     private int _currentScore;
     private float _timeLeft;
     private PuzzlePiece _firstPiece = null;
@@ -36,24 +36,25 @@ public class PuzzleGameManager : MonoBehaviour
     {
         EventBus.Subscribe<GameStartEvent>(OnStartGame);
         EventBus.Subscribe<GameQuitEvent>(OnQuitGame);
+        EventBus.Subscribe<TimerUpdateEvent>(OnTimerHitZero);
     }   
 
     private void OnDisable()
     {
         EventBus.Unsubscribe<GameStartEvent>(OnStartGame);
         EventBus.Unsubscribe<GameQuitEvent>(OnQuitGame);
+        EventBus.Unsubscribe<TimerUpdateEvent>(OnTimerHitZero);
     }
 
     private void OnTimerHitZero(TimerUpdateEvent evt)
     {
-        if (evt.TimeLeft <= 0)
-        {
-            EventBus.Publish(new GameEndEvent(_currentScore, 5f, _currentLevelInfo.numberMoves - _currentMoves,
-                false));
+        _timeLeft = evt.TimeLeft;
+        if (!(_timeLeft <= 0)) return;
+        
+        EventBus.Publish(new GameEndEvent(_currentScore, _timeLeft, _currentLevelInfo.numberMoves - _currentMoves,
+            false));
 
-            _puzzleFactory.ReturnToPool(_currentPuzzle);
-            _currentPuzzle.Clear();
-        }
+        EndGame();
     }
 
     private void OnStartGame(GameStartEvent evt)
@@ -62,10 +63,12 @@ public class PuzzleGameManager : MonoBehaviour
         _currentScore = 0;
         _currentLevelInfo = _levelData.LevelInfos[evt.Difficulty];
         Debug.Log($"Difficulty {evt.Difficulty}");
+        _currentMatches = 0;
+        _timeLeft = 0;
         _currentMoves = 0;
         StartGame(evt.Difficulty);
         EventBus.Publish(new TimerStartEvent(_currentLevelInfo.timeLeft));
-        EventBus.Publish(new MoveChangedEvent( _currentLevelInfo.numberMoves));
+        EventBus.Publish(new MoveChangedEvent(_currentLevelInfo.numberMoves));
     }
 
     private void OnQuitGame(GameQuitEvent evt)
@@ -99,28 +102,30 @@ public class PuzzleGameManager : MonoBehaviour
 
     private bool CheckIfGameEnd(out bool isWin)
     {
-        var hasReachedRequiredMatches = _currentScore >= _currentLevelInfo.requiredMatches;
+        var hasReachedRequiredMatches = _currentMatches >= _currentLevelInfo.requiredMatches;
         var isOutOfMoves = _currentMoves >= _currentLevelInfo.numberMoves;
-
         isWin = hasReachedRequiredMatches;
-
         return isWin || isOutOfMoves;
     }
     
     private void OnPuzzlePieceSelected(PuzzlePiece puzzlePieceRef)
     {
         if (puzzlePieceRef.IsRevealed) return;
+
+        var movesLeft = _currentLevelInfo.numberMoves - _currentMoves;
         
         if (_firstPiece != null)
         {
             if (CheckMatch(_firstPiece, puzzlePieceRef))
             {
-                _currentScore += Mathf.CeilToInt((_currentLevelInfo.numberMoves - _currentMoves) * _timeLeft);
-                EventBus.Publish(new ScoreChangedEvent(_currentScore,1));
+                var newScore = Mathf.CeilToInt(movesLeft * _timeLeft);
+                Debug.Log($"{_currentLevelInfo.numberMoves} {_currentMoves} {_timeLeft}");
+                _currentScore += newScore;
+                EventBus.Publish(new ScoreChangedEvent(_currentScore,newScore));
                 _firstPiece.ToggleCollider(false);
                 puzzlePieceRef.ToggleCollider(false);
                 
-                EventBus.Publish(new ScoreChangedEvent(_currentMoves, 1));
+                _currentMatches++;
             }
             else
             {
@@ -133,14 +138,13 @@ public class PuzzleGameManager : MonoBehaviour
             _currentMoves++;
             
             EventBus.Publish(new MoveChangedEvent(_currentLevelInfo.numberMoves - _currentMoves));
-
+ 
             if (CheckIfGameEnd(out var isWin))
             {
-                EventBus.Publish(new GameEndEvent(_currentScore, 5f, _currentLevelInfo.numberMoves - _currentMoves,
+                EventBus.Publish(new GameEndEvent(_currentScore, _timeLeft, _currentLevelInfo.numberMoves - _currentMoves,
                     isWin));
-                
+
                 EndGame();
-                
             }
 
             _firstPiece = null;

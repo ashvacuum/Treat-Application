@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Extensions;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -34,17 +35,22 @@ namespace Puzzle
         
         public List<PuzzlePiece> GeneratePuzzle(int puzzleSizeX, int puzzleSizeY)
         {
+            ReturnToPool(_puzzlePool);
+            
             var totalPieces = puzzleSizeX * puzzleSizeY;
             var puzzleData = GeneratePuzzleData(totalPieces);
             var puzzleList = new List<PuzzlePiece>();
-            
+            var sb = new StringBuilder();
             for (var i = 0; i < puzzleSizeX; i++)
             {
                 for (var j = 0; j < puzzleSizeY; j++)
                 {
+                    sb.AppendLine($"Type for {i},{j}, {i+j}, {puzzleData[i + j].type}");
                     SetupNewPuzzlePiece(puzzleData[i+j], new Vector2(i,j), puzzleList);
                 }
             }
+            
+            Debug.Log(sb.ToString());
             
             return puzzleList;
         }
@@ -65,8 +71,6 @@ namespace Puzzle
             var cutOffList = new List<PuzzleData>();
             cutOffList.AddRange(_pieceInfo);
             cutOffList.Shuffle();
-            Debug.Log($"Actual Required Size: {actualRequiredSize}, {gridSize}, {_pieceInfo.Count}");
-            
             cutOffList.RemoveRange( actualRequiredSize - 1, _pieceInfo.Count - actualRequiredSize);
             cutOffList.AddRange(cutOffList);
             cutOffList.Shuffle();

@@ -2998,11 +2998,12 @@ MonoBehaviour:
   _pauseButton: {fileID: 1571763801}
   _quitToMenuButton: {fileID: 2107714558}
   _scoreText: {fileID: 850830452}
+  _movesLeftText: {fileID: 1706967661}
   _timerText: {fileID: 509638794}
   _restartButton: {fileID: 1833707512}
   _mainMenuButton: {fileID: 2090188941}
   _finalScoreText: {fileID: 1501346898}
-  _moveText: {fileID: 0}
+  _moveText: {fileID: 766773865}
   _starScores: []
   OnStateChanged:
     m_PersistentCalls:
