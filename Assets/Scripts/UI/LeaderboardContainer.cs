@@ -15,6 +15,7 @@ namespace UI
         {
             _nameText.text = data.playerId;
             _scoreText.text = $"{data.score}";
+            _difficultyText.text = $"{data.difficulty}";
             this.gameObject.SetActive(true);
         }
     }

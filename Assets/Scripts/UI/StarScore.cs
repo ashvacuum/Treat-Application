@@ -16,7 +16,7 @@ namespace UI
         
         public void ShowStarSprite(bool withAnim)
         {
-            _starSprite.DOFade(1, .3f);
+            _starSprite.DOFade(1, .9f);
         }
     }
 }

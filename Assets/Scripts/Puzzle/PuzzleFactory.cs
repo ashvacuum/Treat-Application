@@ -35,8 +35,6 @@ namespace Puzzle
         
         public List<PuzzlePiece> GeneratePuzzle(int puzzleSizeX, int puzzleSizeY)
         {
-            ReturnToPool(_puzzlePool);
-            
             var totalPieces = puzzleSizeX * puzzleSizeY;
             var puzzleData = GeneratePuzzleData(totalPieces);
             var puzzleList = new List<PuzzlePiece>();

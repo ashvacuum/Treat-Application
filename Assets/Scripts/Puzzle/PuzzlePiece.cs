@@ -28,7 +28,18 @@ namespace Puzzle
         private BoxCollider2D _collider;
         
         public event Action<PuzzlePiece> OnPuzzlePieceSelectedEvent;
-        public bool IsRevealed { get; private set; }
+       
+        
+
+        [Header("Flip Settings")]
+        [SerializeField] private float flipDuration = 0.5f;
+        [SerializeField] private Ease flipEase = Ease.InOutQuad;
+
+        public bool IsRevealed { get; private set; } = false;
+
+        
+
+        
        
 
         private void Awake()
@@ -56,29 +67,49 @@ namespace Puzzle
         {
             if (IsRevealed) return;
             OnPuzzlePieceSelectedEvent?.Invoke(this);
-            IsRevealed = true;
-            _backgroundSpriteRenderer.DOFade(0, .5f);
-            _hiddenSpriteRenderer.DOFade(1, .6f);
+
+            
+            transform.DOScaleX(0f, flipDuration / 2)
+                .SetEase(flipEase)
+                .OnComplete(() => 
+                {
+                    _backgroundSpriteRenderer.enabled = !_backgroundSpriteRenderer.enabled;
+                    _hiddenSpriteRenderer.enabled = !_hiddenSpriteRenderer.enabled;
+
+                    transform.DOScaleX(1f, flipDuration / 2)
+                        .SetEase(flipEase);
+                });
+
+            IsRevealed = !IsRevealed;
         }
 
         public void Hide(bool shouldAnimate = false, float delay = 1)
         {
-            if (shouldAnimate)
+            if(!shouldAnimate)
             {
-                StartCoroutine(DelayedAction(delay,() =>
-                {
-                    _backgroundSpriteRenderer.DOFade(1, .3f);
-                    _hiddenSpriteRenderer.DOFade(0, .2f);
-                    ToggleCollider(true);
-                    IsRevealed = false;
-                    Debug.Log("Reenabling Collider with fade");
-                }));
-                
+                transform.localScale = Vector3.one;
+                _backgroundSpriteRenderer.enabled = true;
+                _hiddenSpriteRenderer.enabled = false;
+                IsRevealed = false;
+                return;
             }
-            else
+            
+            StartCoroutine(DelayedAction(1f, () =>
             {
-                _hiddenSpriteRenderer.color = new Color(1, 1, 1, 0);
-            }
+                transform.DOScaleX(0f, flipDuration / 3)
+                    .SetEase(flipEase)
+                    .OnComplete(() => 
+                    {
+                        _backgroundSpriteRenderer.enabled = true;
+                        _hiddenSpriteRenderer.enabled = false;
+                        IsRevealed = false;
+
+                        transform.DOScaleX(1f, flipDuration / 3)
+                            .SetEase(flipEase);
+                    });
+            }));
+
+            
         }
 
         public void ToggleCollider(bool isEnabled)

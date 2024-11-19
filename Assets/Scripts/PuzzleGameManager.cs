@@ -49,6 +49,7 @@ public class PuzzleGameManager : MonoBehaviour
     private void OnTimerHitZero(TimerUpdateEvent evt)
     {
         _timeLeft = evt.TimeLeft;
+        Debug.Log($"Time Left: {_timeLeft}");
         if (!(_timeLeft <= 0)) return;
         
         EventBus.Publish(new GameEndEvent(_currentScore, _timeLeft, _currentLevelInfo.numberMoves - _currentMoves,
@@ -122,8 +123,6 @@ public class PuzzleGameManager : MonoBehaviour
                 Debug.Log($"{_currentLevelInfo.numberMoves} {_currentMoves} {_timeLeft}");
                 _currentScore += newScore;
                 EventBus.Publish(new ScoreChangedEvent(_currentScore,newScore));
-                _firstPiece.ToggleCollider(false);
-                puzzlePieceRef.ToggleCollider(false);
                 
                 _currentMatches++;
             }

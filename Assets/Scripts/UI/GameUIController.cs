@@ -151,8 +151,11 @@ public class GameUIController : MonoBehaviour
     {
         TransitionTo<GameState>();
         _lastKnownDifficulty = (int)_startGameSlider.value;
-        Debug.Log($"Last known {_lastKnownDifficulty}");
         EventBus.Publish(new GameStartEvent(Time.time, _lastKnownDifficulty, _userNameInput.text));
+        foreach (var star in _starScores)
+        {
+            star.Init();
+        }
     }
 
     private void UpdateLevelValue(float value)
@@ -191,6 +194,10 @@ public class GameUIController : MonoBehaviour
         TransitionTo<GameState>();
         var userName = _userNameInput != null ? _userNameInput.text : string.Empty;
         EventBus.Publish(new GameStartEvent(Time.time, _lastKnownDifficulty, userName));
+        foreach (var star in _starScores)
+        {
+            star.Init();
+        }
     }
 
     private void ReturnToMainMenu()
@@ -217,25 +224,20 @@ public class GameUIController : MonoBehaviour
     private void PopulatePostGameWithData(GameEndEvent evt)
     {
         TransitionTo<PostGameState>();
-        
+
         if (evt.DidWin)
         {
             foreach (var star in _starScores)
             {
                 star.ShowStarSprite(true);
             }
-
-            if (_finalScoreText != null)
-                _finalScoreText.text = $"Score: {evt.FinalScore}";
-
-            if (_moveText.text != null)
-                _moveText.text = $"Moves Left : {evt.MovesLeft}";
         }
-        else
-        {
-            if (_finalScoreText != null)
-                _finalScoreText.text = $"Score: 0";
-        }     
+
+        if (_finalScoreText != null)
+            _finalScoreText.text = $"Score: {evt.FinalScore}";
+
+        if (_moveText.text != null)
+            _moveText.text = $"Moves Left : {evt.MovesLeft}";
     }
 
     private void OnMovesChanged(MoveChangedEvent evt)

@@ -47,11 +47,12 @@ namespace UI
         
             if (_timeElapsed >= _targetTime)
             {
+                EventBus.Publish(new TimerUpdateEvent( 0));
                 StopTimer();
             }
             else
             {
-                EventBus.Publish(new TimerUpdateEvent(_targetTime - _timeElapsed));
+                EventBus.Publish(new TimerUpdateEvent( Mathf.Max(_targetTime - _timeElapsed,0)));
             }
         }
     }

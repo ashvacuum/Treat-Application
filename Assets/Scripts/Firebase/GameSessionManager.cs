@@ -46,6 +46,8 @@ namespace Firebase
             {
                 firestoreService.SavePlayerScore(_currentGameSession.playerId, _currentGameSession.playerId,
                     _currentGameSession.score, _currentGameSession.difficulty);
+                
+                Debug.Log($"{_currentGameSession.playerId}, {_currentGameSession.score}, {_currentGameSession.difficulty}");
             }
         }
 
