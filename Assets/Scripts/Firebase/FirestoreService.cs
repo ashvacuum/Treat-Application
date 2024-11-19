@@ -134,5 +134,6 @@ namespace Firebase
         Task SavePlayerScore(string playerId, string playerName, int score);
         Task<Dictionary<string, object>> GetPlayerData(string playerId);
         Task UpdatePlayerScore(string playerId, int newScore);
+        Task<List<GameSessionData>> QueryHighScores(int minimumScore);
     }
 }

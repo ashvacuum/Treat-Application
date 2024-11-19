@@ -25,13 +25,13 @@ public class GameUIController : MonoBehaviour
     [SerializeField] private Slider _startGameSlider;
     [SerializeField] private TextMeshProUGUI _levelText;
     [SerializeField] private TMP_InputField _userNameInput;
-
+    [SerializeField] private LeaderboardPanel _leaderboardPanel;
     
     [Header("In-Game UI Elements")]
     [SerializeField] private Button _pauseButton;
     [SerializeField] private Button _quitToMenuButton;
     [SerializeField] private TextMeshProUGUI _scoreText;
-    [SerializeField] private TextMeshProUGUI _moveText;
+    
     [SerializeField] private TextMeshProUGUI _timerText;
 
     
@@ -39,6 +39,7 @@ public class GameUIController : MonoBehaviour
     [SerializeField] private Button _restartButton;
     [SerializeField] private Button _mainMenuButton;
     [SerializeField] private TextMeshProUGUI _finalScoreText;
+    [SerializeField] private TextMeshProUGUI _moveText;
     [SerializeField] private StarScore[] _starScores;
 
     
@@ -234,8 +235,9 @@ public class GameUIController : MonoBehaviour
     public void ShowPreGamePanel(bool show) => _preGamePanel.SetActive(show);
     public void ShowGamePanel(bool show) => _gamePanel.SetActive(show);
     public void ShowPostGamePanel(bool show) => _postGamePanel.SetActive(show);
+    public void ShowLeaderboardsPanel(bool show) => _leaderboardPanel.gameObject.SetActive(show);
 
-    
+
 }
 
     public interface IGameUIState

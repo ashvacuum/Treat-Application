@@ -16,6 +16,7 @@ namespace UI
         {
             controller.ShowPreGamePanel(false);
             // Clean up pre-game UI elements, listeners, etc.
+            controller.ShowLeaderboardsPanel(false);
         }
 
         public override void Update()
