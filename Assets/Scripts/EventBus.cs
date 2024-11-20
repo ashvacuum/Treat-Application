@@ -60,7 +60,7 @@ public class GamePauseEvent : GameEvent
 //for analytics usage
 public class GameEndEvent : GameEvent
 {
-    public int FinalScore { get; }
+    public int FinalScore { get; }  
     public float GameDuration { get; }
     public int MovesLeft { get; }
     public bool DidWin { get; }

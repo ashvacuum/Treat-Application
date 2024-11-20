@@ -225,11 +225,19 @@ public class GameUIController : MonoBehaviour
     {
         TransitionTo<PostGameState>();
 
+        Debug.Log($"Did win? {evt.DidWin}");
         if (evt.DidWin)
         {
             foreach (var star in _starScores)
             {
                 star.ShowStarSprite(true);
+            }
+        }
+        else
+        {
+            foreach (var star in _starScores)
+            {
+                star.Init();
             }
         }
 

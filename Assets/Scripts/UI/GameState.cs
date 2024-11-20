@@ -7,6 +7,8 @@ namespace UI
         public override void OnEnter()
         {
             controller.ShowGamePanel(true);
+            controller.ShowPostGamePanel(false);
+            controller.ShowPreGamePanel(false);
             // Setup in-game UI elements, listeners, etc.
         }
 
