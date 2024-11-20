@@ -97,7 +97,7 @@ ServiceLocator acts as a centralized registry for accessing application services
 
 ### Single Responsibility Principle (S)
 - ServiceLocator's sole responsibility is managing service instances
-- Each service can handles one specific Firebase feature 
+- Each service can handle a specific Firebase feature 
 - Clear separation between service registration and service consumption
 - Simplified dependency management in components
 
